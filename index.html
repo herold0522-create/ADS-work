@@ -256,6 +256,54 @@ body{
 .brand{font-family:'Press Start 2P';font-size:11px;color:#fff;line-height:2;margin-top:14px;}
 .brand .sub{display:block;font-family:'Noto Serif SC';font-weight:500;font-size:14px;color:var(--violet-l);margin-top:8px;letter-spacing:0;}
 
+/* ============ 支付宝跳转卡片 ============ */
+.alipay-card{
+  background:linear-gradient(135deg,#1677ff,#0a5cd6);
+  padding:14px 15px;cursor:pointer;color:#fff;
+  box-shadow:var(--shadow),0 5px 0 1px #084aa8;
+  display:flex;align-items:center;gap:13px;
+  animation:bIn .4s ease, apGlow 1.6s 1s infinite;
+}
+@keyframes apGlow{0%,100%{box-shadow:var(--shadow),0 5px 0 1px #084aa8}50%{box-shadow:var(--shadow),0 5px 0 1px #084aa8,0 0 24px rgba(22,119,255,.8)}}
+.alipay-card:active{transform:translateY(4px);}
+.ap-logo{width:40px;height:40px;background:#fff;border-radius:9px;position:relative;flex-shrink:0;}
+.ap-logo::before{content:"支";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC';font-weight:900;font-size:24px;color:#1677ff;}
+.ap-text{flex:1;}
+.ap-text .t1{font-family:'Noto Serif SC';font-weight:900;font-size:15px;letter-spacing:.5px;}
+.ap-text .t2{font-family:'Noto Serif SC';font-weight:500;font-size:12px;color:#cfe2ff;margin-top:3px;}
+.ap-arrow{font-size:20px;color:#fff;}
+
+/* 跳转支付宝过场 */
+.jump-overlay{position:absolute;inset:0;z-index:300;background:#1677ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .4s;}
+.jump-overlay.on{opacity:1;pointer-events:auto;}
+.jump-overlay .ap-big{width:74px;height:74px;background:#fff;border-radius:18px;position:relative;animation:pop .5s;}
+.jump-overlay .ap-big::before{content:"支";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC';font-weight:900;font-size:46px;color:#1677ff;}
+.jump-overlay .jt{font-family:'Noto Serif SC';font-weight:700;font-size:17px;color:#fff;}
+.jump-spin{width:34px;height:34px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============ AI 对比屏 ============ */
+.vs-screen{background:linear-gradient(175deg,#1f1636,#15131f);}
+.vs-head{text-align:center;margin-bottom:18px;}
+.vs-head .q{font-family:'Noto Serif SC';font-weight:900;font-size:18px;color:var(--ink);background:var(--bg2);box-shadow:var(--shadow);padding:12px 14px;display:inline-block;}
+.vs-head .label{font-family:'Press Start 2P';font-size:8px;color:var(--dim);letter-spacing:2px;margin-bottom:10px;}
+.vs-cols{flex:1;display:flex;gap:10px;}
+.vs-col{flex:1;display:flex;flex-direction:column;background:var(--bg1);box-shadow:var(--shadow);padding:14px 11px;}
+.vs-col .who{font-family:'Press Start 2P';font-size:8px;text-align:center;padding:7px 0;margin-bottom:12px;letter-spacing:1px;}
+.vs-col.other .who{color:var(--dim);background:#0d0b14;}
+.vs-col.qwen .who{color:#fff;background:var(--violet);}
+.vs-bubble{font-family:'Noto Serif SC';font-weight:500;font-size:13px;line-height:1.65;color:var(--ink);background:var(--bg2);padding:11px;border-radius:10px 10px 10px 2px;margin-bottom:10px;flex:1;}
+.vs-other-result{margin-top:auto;text-align:center;padding:12px 8px;border:2px dashed var(--line);}
+.vs-other-result .x{font-size:26px;color:var(--dim);}
+.vs-other-result .txt{font-family:'Noto Serif SC';font-weight:700;font-size:12px;color:var(--dim);margin-top:6px;line-height:1.5;}
+.vs-qwen-result{margin-top:auto;}
+.vs-mini-alipay{background:linear-gradient(135deg,#1677ff,#0a5cd6);padding:10px;text-align:center;color:#fff;box-shadow:0 3px 0 #084aa8;animation:apGlow 1.6s infinite;}
+.vs-mini-alipay .t1{font-family:'Noto Serif SC';font-weight:900;font-size:12px;}
+.vs-mini-alipay .t2{font-size:10px;color:#cfe2ff;margin-top:2px;}
+.vs-tick{font-size:26px;color:var(--mint);text-align:center;margin-bottom:6px;}
+.vs-verdict{text-align:center;font-family:'Noto Serif SC';font-weight:900;font-size:16px;color:var(--gold);margin-top:16px;line-height:1.5;}
+.vs-verdict b{color:var(--violet-l);}
+
 /* 烟花粒子 */
 .fx{position:absolute;width:7px;height:7px;pointer-events:none;z-index:150;}
 
@@ -361,8 +409,39 @@ body{
     </div>
   </section>
 
-  <!-- 屏8 通关落版 -->
-  <section class="screen center" data-s="7">
+  <!-- 屏8 AI 对比 -->
+  <section class="screen vs-screen" data-s="7">
+    <div class="vs-head">
+      <div class="label px-font">SAME QUESTION</div>
+      <div class="q">「帮我妈报销住院费」</div>
+    </div>
+    <div class="vs-cols">
+      <div class="vs-col other">
+        <div class="who">其他 AI</div>
+        <div class="vs-bubble">报销需要带身份证、发票、出院小结，到当地医保窗口办理，流程大致是……（一长串解释）</div>
+        <div class="vs-other-result">
+          <div class="x">✕</div>
+          <div class="txt">只能告诉你"怎么做"<br>剩下的路还得自己跑</div>
+        </div>
+      </div>
+      <div class="vs-col qwen">
+        <div class="who">千问</div>
+        <div class="vs-bubble">材料我列好了，名词也翻译好了。办理入口在这儿，点一下直达 👇</div>
+        <div class="vs-qwen-result">
+          <div class="vs-tick">✓</div>
+          <div class="vs-mini-alipay">
+            <div class="t1">支付宝 · 政务办理</div>
+            <div class="t2">点击直达「晓政」助手</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="vs-verdict">别的 AI 只能"答"，<br><b>千问能直接帮你"办"</b></p>
+    <button class="btn violet sm breathe" style="align-self:center;margin-top:16px;" onclick="go(8)">这就去办 →</button>
+  </section>
+
+  <!-- 屏9 通关落版 -->
+  <section class="screen center" data-s="8">
     <p class="clear-big">CLEAR!</p>
     <p class="h-title" style="font-size:22px;color:var(--mint);margin-top:14px;">难事，一句话通关</p>
     <p class="body" style="font-size:15px;margin-top:10px;">技能已解锁 · 这个本事，全家都能用</p>
@@ -376,12 +455,19 @@ body{
     </div>
   </section>
 
+  <!-- 支付宝跳转过场 -->
+  <div class="jump-overlay" id="jumpOverlay">
+    <div class="ap-big"></div>
+    <div class="jt">正在跳转支付宝 · 政务服务…</div>
+    <div class="jump-spin"></div>
+  </div>
+
   <div class="dots" id="dots"></div>
 </div>
 
 <script>
 const phone=document.getElementById('phone');
-let cur=0;const TOTAL=8;
+let cur=0;const TOTAL=9;
 const dots=document.getElementById('dots');
 for(let i=0;i<TOTAL;i++)dots.appendChild(document.createElement('i'));
 function updateDots(){[...dots.children].forEach((d,i)=>d.classList.toggle('on',i===cur));}
@@ -400,7 +486,7 @@ function go(n){
   if(n===3)initStage2();
   if(n===4)initStage3();
   if(n===6)initQwen();
-  if(n===7)initEnd();
+  if(n===8)initEnd();
 }
 
 /* 关卡1 */
@@ -511,8 +597,20 @@ async function qwenSend(){
   await new Promise(r=>setTimeout(r,700));
   const c=document.getElementById('chat');
   const p=document.createElement('p');p.className='prog';p.textContent='办事步骤省去 60%+';c.appendChild(p);
-  const d=document.createElement('div');d.className='door';d.textContent='直达办理入口 →';d.onclick=()=>{fireworks();setTimeout(()=>go(7),500);};c.appendChild(d);
+  const d=document.createElement('div');d.className='door';d.textContent='① 查看办理材料清单 ✓';d.style.cursor='default';c.appendChild(d);
+  // 支付宝跳转卡片
+  await new Promise(r=>setTimeout(r,500));
+  const ap=document.createElement('div');ap.className='alipay-card';
+  ap.innerHTML='<div class="ap-logo"></div><div class="ap-text"><div class="t1">② 直达支付宝 · 政务办理</div><div class="t2">转交「晓政」助手，扫清最后一步</div></div><div class="ap-arrow">›</div>';
+  ap.onclick=()=>jumpAlipay();
+  c.appendChild(ap);
   c.scrollTop=99999;
+}
+
+/* 跳转支付宝过场 → 进对比屏 */
+function jumpAlipay(){
+  const o=document.getElementById('jumpOverlay');o.classList.add('on');
+  setTimeout(()=>{o.classList.remove('on');go(7);},1700);
 }
 
 /* 屏8 */
