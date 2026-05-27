@@ -1,0 +1,543 @@
+<!--
+  报销大作战 · 千问 H5 Demo (精致重制版)
+  设计语言：限定 8 色调色板 / CSS 像素 sprite / 暗夜霓虹复古
+  字体：标题 Press Start 2P(克制) · 中文正文 Noto Serif SC / LXGW
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>报销大作战 · 千问</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Serif+SC:wght@500;700;900&display=swap" rel="stylesheet">
+
+<style>
+/* ============ 限定调色板（整支片子只用这几色，这是精致感的来源） ============ */
+:root{
+  --bg0:#15131f;        /* 最深底 */
+  --bg1:#211d33;        /* 面板底 */
+  --bg2:#322a4d;        /* 抬高面 */
+  --ink:#e8e2f4;        /* 主文字 */
+  --dim:#8b81a8;        /* 弱文字 */
+  --line:#473d63;       /* 描边/分隔 */
+  --rose:#ff5c7c;       /* 危险/热 */
+  --rose-d:#c2415e;
+  --gold:#ffc94d;       /* 高光/金 */
+  --gold-d:#d9a32e;
+  --mint:#5fe6b8;       /* 成功 */
+  --violet:#8b6bff;     /* 千问紫（主品牌色） */
+  --violet-l:#b9a4ff;
+  --violet-d:#5d44c4;
+  --paper:#efe6d2;      /* 纸/卡 */
+  --shadow:0 0 0 3px #0d0b14;
+  --px:3px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#000;}
+body{
+  font-family:'Noto Serif SC',serif;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-font-smoothing:antialiased;
+}
+.px-font{font-family:'Press Start 2P',monospace;}
+
+/* ============ 手机框 ============ */
+#phone{
+  position:relative;
+  width:min(100vw,412px);
+  height:min(100dvh,860px);
+  aspect-ratio:412/860;
+  background:var(--bg0);
+  overflow:hidden;
+  box-shadow:0 0 0 8px #0a0810, 0 20px 60px rgba(139,107,255,.25);
+  transition:background .7s cubic-bezier(.4,0,.2,1);
+}
+/* 极淡扫描线 + 暗角，营造 CRT 复古质感但不脏 */
+#phone::before{
+  content:"";position:absolute;inset:0;z-index:200;pointer-events:none;
+  background:radial-gradient(120% 120% at 50% 50%,transparent 60%,rgba(0,0,0,.45));
+}
+#phone::after{
+  content:"";position:absolute;inset:0;z-index:201;pointer-events:none;opacity:.4;
+  background:repeating-linear-gradient(to bottom,transparent 0 3px,rgba(0,0,0,.06) 3px 4px);
+}
+
+/* ============ 屏幕切换 ============ */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:30px 24px 40px;}
+.screen.active{display:flex;animation:scrIn .5s ease;}
+@keyframes scrIn{from{opacity:0}to{opacity:1}}
+.center{align-items:center;justify-content:center;text-align:center;}
+.spacer{flex:1;}
+
+/* ============ 字体层级 ============ */
+.kicker{font-family:'Press Start 2P';font-size:8px;letter-spacing:2px;color:var(--violet-l);text-transform:uppercase;}
+.h-title{font-family:'Noto Serif SC';font-weight:900;color:var(--ink);line-height:1.15;letter-spacing:1px;}
+.body{font-family:'Noto Serif SC';font-weight:500;color:var(--ink);line-height:1.7;}
+.dim{color:var(--dim);}
+
+/* ============ 像素按钮（厚边+底影，按下回弹） ============ */
+.btn{
+  font-family:'Noto Serif SC';font-weight:900;font-size:17px;letter-spacing:2px;
+  color:#fff;background:var(--rose);border:none;cursor:pointer;
+  padding:15px 30px;position:relative;
+  box-shadow:0 0 0 3px #0d0b14, 0 6px 0 0 var(--rose-d), 0 6px 0 3px #0d0b14;
+  transition:transform .07s, box-shadow .07s;
+}
+.btn:active{transform:translateY(5px);box-shadow:0 0 0 3px #0d0b14,0 1px 0 0 var(--rose-d),0 1px 0 3px #0d0b14;}
+.btn.violet{background:var(--violet);box-shadow:0 0 0 3px #0d0b14,0 6px 0 0 var(--violet-d),0 6px 0 3px #0d0b14;}
+.btn.violet:active{box-shadow:0 0 0 3px #0d0b14,0 1px 0 0 var(--violet-d),0 1px 0 3px #0d0b14;}
+.btn.gold{background:var(--gold);color:#3a2c08;box-shadow:0 0 0 3px #0d0b14,0 6px 0 0 var(--gold-d),0 6px 0 3px #0d0b14;}
+.btn.gold:active{box-shadow:0 0 0 3px #0d0b14,0 1px 0 0 var(--gold-d),0 1px 0 3px #0d0b14;}
+.btn.sm{font-size:13px;padding:11px 20px;}
+.breathe{animation:breathe 1.6s ease-in-out infinite;}
+@keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ============ CSS 像素 SPRITE ============ */
+/* 通用：用 box-shadow 画像素点阵，1 单位 = 6px */
+.sprite{position:relative;image-rendering:pixelated;}
+
+/* 主角（中年女性，赭发+青围巾），16x16 网格用 multiple box-shadow */
+.hero{width:96px;height:96px;}
+.hero i{position:absolute;width:6px;height:6px;left:0;top:0;}
+/* 用渐变块拼一个简洁角色头像替代——更可控 */
+.avatar{
+  width:84px;height:84px;position:relative;
+  background:
+    /* 脸 */
+    linear-gradient(var(--paper),var(--paper)) 24px 30px/36px 30px no-repeat,
+    /* 头发 */
+    linear-gradient(#9c4f3a,#9c4f3a) 18px 18px/48px 24px no-repeat,
+    linear-gradient(#9c4f3a,#9c4f3a) 18px 30px/12px 24px no-repeat,
+    linear-gradient(#9c4f3a,#9c4f3a) 54px 30px/12px 24px no-repeat,
+    /* 围巾 */
+    linear-gradient(#3aa0a0,#3aa0a0) 18px 66px/48px 18px no-repeat;
+  filter:drop-shadow(3px 3px 0 #0d0b14);
+}
+.avatar::before{content:"";position:absolute;left:33px;top:42px;width:6px;height:6px;background:#2b2b3a;box-shadow:18px 0 #2b2b3a;}
+.avatar::after{content:"";position:absolute;left:36px;top:54px;width:12px;height:4px;background:#c2415e;border-radius:0 0 4px 4px;}
+
+/* 城堡（报销关卡门） */
+.castle{
+  width:120px;height:120px;position:relative;
+  background:
+    linear-gradient(var(--bg2),var(--bg2)) 24px 36px/72px 72px no-repeat,
+    linear-gradient(var(--line),var(--line)) 18px 24px/24px 24px no-repeat,
+    linear-gradient(var(--line),var(--line)) 78px 24px/24px 24px no-repeat,
+    linear-gradient(var(--line),var(--line)) 48px 18px/24px 18px no-repeat;
+  filter:drop-shadow(4px 4px 0 #0d0b14);
+}
+.castle::before{content:"";position:absolute;left:48px;top:66px;width:24px;height:42px;background:#0d0b14;border-radius:12px 12px 0 0;}
+.castle::after{content:"💴";position:absolute;left:0;right:0;top:-6px;text-align:center;font-size:22px;filter:none;}
+
+/* ============ HUD 血条 ============ */
+.hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.stage-tag{font-family:'Press Start 2P';font-size:9px;color:var(--bg0);background:var(--gold);padding:7px 9px;box-shadow:var(--shadow);}
+.hearts{display:flex;gap:5px;}
+.heart{width:18px;height:18px;position:relative;}
+.heart::before,.heart::after{content:"";position:absolute;width:9px;height:14px;background:var(--rose);border-radius:9px 9px 0 0;top:0;}
+.heart::before{left:0;transform:rotate(-30deg);transform-origin:bottom right;}
+.heart::after{right:0;transform:rotate(30deg);transform-origin:bottom left;}
+.heart.dead::before,.heart.dead::after{background:var(--line);}
+
+.hint{font-family:'Noto Serif SC';font-weight:700;font-size:18px;color:var(--ink);text-align:center;margin-bottom:16px;}
+.feedback{font-family:'Noto Serif SC';font-weight:700;font-size:15px;text-align:center;min-height:22px;color:var(--rose);margin-top:12px;}
+
+/* 倒计时条 */
+.timer{height:14px;background:var(--bg1);box-shadow:var(--shadow);margin-bottom:18px;position:relative;overflow:hidden;}
+.timer > i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--rose));transition:width .25s linear;}
+
+/* ============ 关卡1 材料卡 ============ */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.matcard{
+  aspect-ratio:1;background:var(--paper);position:relative;cursor:pointer;
+  box-shadow:var(--shadow),0 4px 0 1px #0d0b14;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  transition:transform .1s;
+}
+.matcard:active{transform:scale(.93);}
+.matcard .ico{width:34px;height:34px;}
+.matcard .nm{font-family:'Noto Serif SC';font-weight:700;font-size:12px;color:#3a2c08;}
+.matcard.right{background:var(--mint);animation:pop .3s;}
+.matcard.wrong{animation:shake .3s;}
+.matcard.wrong .nm{color:#fff;}
+.matcard.wrong{background:var(--rose);}
+.matcard.picked{opacity:.4;pointer-events:none;}
+@keyframes pop{50%{transform:scale(1.12)}}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+/* 像素图标（纯 CSS 方块拼） */
+.ico-id{background:linear-gradient(#5b8def,#5b8def);border-radius:3px;position:relative;}
+.ico-id::before{content:"";position:absolute;left:5px;top:7px;width:9px;height:9px;background:#fff;border-radius:50%;}
+.ico-id::after{content:"";position:absolute;left:18px;top:8px;width:11px;height:3px;background:#fff;box-shadow:0 6px #fff,0 12px #fff;}
+.ico-bill{background:var(--paper);border:2px solid #3a2c08;position:relative;}
+.ico-bill::before{content:"";position:absolute;left:5px;top:6px;width:20px;height:2px;background:#3a2c08;box-shadow:0 5px #3a2c08,0 10px #3a2c08,0 15px #c2415e;}
+.ico-doc{background:#fff;border:2px solid var(--violet);position:relative;}
+.ico-doc::before{content:"+";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:900;font-size:24px;line-height:1;}
+.ico-food{background:#ff9a3c;border-radius:50% 50% 4px 4px;position:relative;}
+.ico-food::before{content:"";position:absolute;left:4px;top:8px;right:4px;height:4px;background:#7a3a12;border-radius:3px;}
+.ico-ticket{background:var(--rose);border-radius:4px;position:relative;}
+.ico-ticket::before{content:"";position:absolute;left:0;top:13px;width:100%;height:0;border-top:3px dashed var(--paper);}
+.ico-pet{background:#a86b3c;border-radius:50%;position:relative;}
+.ico-pet::before{content:"";position:absolute;left:2px;top:-3px;width:8px;height:8px;background:#a86b3c;border-radius:50%;box-shadow:22px 0 #a86b3c;}
+
+/* ============ 关卡2 排队 ============ */
+.queue-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;}
+.sign{background:var(--bg1);box-shadow:var(--shadow);padding:18px;text-align:center;border-top:4px solid var(--gold);}
+.sign .px-font{font-size:10px;color:var(--gold);line-height:1.9;}
+.sign.err{border-top-color:var(--rose);}
+.sign.err .px-font{color:var(--rose);}
+.queue{display:flex;gap:8px;justify-content:center;align-items:flex-end;min-height:60px;flex-wrap:wrap;}
+.person{width:24px;height:40px;position:relative;}
+.person::before{content:"";position:absolute;left:6px;top:0;width:12px;height:12px;background:var(--dim);border-radius:50%;}
+.person::after{content:"";position:absolute;left:3px;top:13px;width:18px;height:26px;background:var(--line);border-radius:6px 6px 2px 2px;}
+.person.me::before{background:#9c4f3a;}
+.person.me::after{background:#3aa0a0;}
+.person.me{filter:drop-shadow(0 0 8px var(--gold));}
+
+/* ============ 关卡3 黑话 ============ */
+.jargon-box{background:var(--bg0);border:3px dashed var(--rose);padding:22px;text-align:center;margin-bottom:16px;box-shadow:var(--shadow);}
+.jargon-box .word{font-family:'Noto Serif SC';font-weight:900;font-size:30px;color:var(--rose);letter-spacing:3px;}
+.jargon-box .q{font-family:'Press Start 2P';font-size:8px;color:var(--dim);margin-top:8px;}
+.opts{display:flex;flex-direction:column;gap:11px;}
+.opt{background:var(--bg2);color:var(--ink);border:none;padding:15px;font-family:'Noto Serif SC';font-weight:700;font-size:16px;text-align:left;cursor:pointer;box-shadow:var(--shadow),0 3px 0 1px #0d0b14;transition:transform .1s;}
+.opt:active{transform:scale(.97);}
+.opt.right{background:var(--mint);color:#0d3a2a;}
+.opt.wrong{background:var(--rose);color:#fff;}
+
+/* ============ GAME OVER ============ */
+.go-big{font-family:'Press Start 2P';font-size:28px;color:var(--rose);line-height:1.6;text-align:center;text-shadow:var(--px) var(--px) 0 #0d0b14;animation:goGlitch .5s infinite steps(2);}
+@keyframes goGlitch{0%{transform:translate(0)}50%{transform:translate(-2px,1px);text-shadow:calc(var(--px)*-1) var(--px) 0 var(--violet)}}
+.whisper{background:var(--bg1);box-shadow:var(--shadow);border-left:4px solid var(--violet);padding:18px;animation:glowV 2s infinite;}
+@keyframes glowV{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:var(--shadow),0 0 24px rgba(139,107,255,.5)}}
+
+/* ============ 千问对话 ============ */
+.qwen-screen{background:linear-gradient(170deg,#241a3a 0%,#1a1430 100%);}
+.chat-head{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:2px solid var(--violet-d);margin-bottom:16px;}
+.q-logo{width:42px;height:42px;background:linear-gradient(135deg,var(--violet),var(--violet-l));position:relative;box-shadow:0 0 18px var(--violet);clip-path:polygon(20% 0,80% 0,100% 20%,100% 80%,80% 100%,20% 100%,0 80%,0 20%);}
+.q-logo::before{content:"Q";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P';font-size:16px;color:#fff;}
+.q-name{font-family:'Press Start 2P';font-size:12px;color:#fff;letter-spacing:1px;}
+.q-name small{display:block;font-family:'Noto Serif SC';font-weight:500;font-size:13px;color:var(--violet-l);margin-top:5px;letter-spacing:0;}
+.chat-flow{flex:1;display:flex;flex-direction:column;gap:13px;overflow-y:auto;padding-right:4px;}
+.chat-flow::-webkit-scrollbar{width:0;}
+.bubble{max-width:84%;padding:12px 15px;font-family:'Noto Serif SC';font-weight:500;font-size:16px;line-height:1.6;animation:bIn .4s ease;}
+@keyframes bIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.bubble.user{align-self:flex-end;background:var(--violet);color:#fff;border-radius:14px 14px 3px 14px;}
+.bubble.bot{align-self:flex-start;background:var(--bg2);color:var(--ink);border-radius:14px 14px 14px 3px;border:1px solid var(--line);}
+.bubble.bot b{color:var(--violet-l);font-weight:900;}
+.typing{align-self:flex-start;display:flex;gap:5px;padding:14px 16px;background:var(--bg2);border-radius:14px;}
+.typing i{width:7px;height:7px;background:var(--violet-l);border-radius:50%;animation:td 1s infinite;}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.checklist{list-style:none;margin-top:6px;font-size:15px;line-height:2;}
+.checklist li{opacity:0;animation:bIn .4s forwards;}
+.prog{font-family:'Press Start 2P';font-size:9px;color:var(--mint);text-align:center;letter-spacing:1px;animation:bIn .5s;}
+.door{background:var(--gold);color:#3a2c08;font-family:'Noto Serif SC';font-weight:900;font-size:16px;padding:15px;text-align:center;cursor:pointer;box-shadow:var(--shadow),0 5px 0 1px var(--gold-d);animation:doorGlow 1.4s infinite;letter-spacing:1px;}
+@keyframes doorGlow{0%,100%{box-shadow:var(--shadow),0 5px 0 1px var(--gold-d)}50%{box-shadow:var(--shadow),0 5px 0 1px var(--gold-d),0 0 26px rgba(255,201,77,.85)}}
+.door:active{transform:translateY(4px);}
+.cinput{display:flex;gap:9px;margin-top:14px;align-items:center;}
+.cinput .fake{flex:1;background:var(--bg0);border:2px solid var(--violet-d);padding:13px;font-family:'Noto Serif SC';font-weight:500;font-size:15px;color:var(--ink);border-radius:8px;}
+.send{width:48px;height:48px;background:var(--violet);border:none;cursor:pointer;border-radius:8px;position:relative;box-shadow:0 4px 0 var(--violet-d);}
+.send::before{content:"";position:absolute;inset:0;margin:auto;width:0;height:0;border-left:14px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;left:4px;}
+.send:active{transform:translateY(3px);box-shadow:0 1px 0 var(--violet-d);}
+
+/* ============ CLEAR + 四代 + 落版 ============ */
+.clear-big{font-family:'Press Start 2P';font-size:34px;color:var(--gold);text-shadow:var(--px) var(--px) 0 var(--violet),calc(var(--px)*2) calc(var(--px)*2) 0 #0d0b14;animation:pop .6s;}
+.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;width:100%;margin:22px 0;}
+.gen{background:var(--bg1);box-shadow:var(--shadow);padding:16px 10px;text-align:center;cursor:pointer;opacity:.45;transition:.3s;}
+.gen.lit{opacity:1;background:linear-gradient(150deg,var(--violet),var(--violet-d));box-shadow:var(--shadow),0 0 20px var(--violet);transform:translateY(-3px);}
+.gen .face{width:44px;height:44px;margin:0 auto;}
+.gen .who{font-family:'Press Start 2P';font-size:9px;color:var(--gold);margin:9px 0 5px;}
+.gen .act{font-family:'Noto Serif SC';font-weight:700;font-size:14px;color:var(--ink);}
+/* 四张脸用不同色块区分 */
+.f-ma{background:radial-gradient(circle at 50% 35%,var(--paper) 40%,transparent 41%),linear-gradient(#bfbfbf,#bfbfbf);border-radius:50% 50% 40% 40%;}
+.f-me{background:radial-gradient(circle at 50% 35%,var(--paper) 40%,transparent 41%),linear-gradient(#9c4f3a,#9c4f3a);border-radius:50% 50% 40% 40%;}
+.f-di{background:radial-gradient(circle at 50% 35%,var(--paper) 40%,transparent 41%),linear-gradient(#2b2b3a,#2b2b3a);border-radius:50% 50% 40% 40%;}
+.f-wa{background:radial-gradient(circle at 50% 38%,var(--paper) 38%,transparent 39%),linear-gradient(#3aa0a0,#3aa0a0);border-radius:50%;}
+
+.slogan{font-family:'Noto Serif SC';font-weight:900;font-size:30px;color:var(--gold);line-height:1.4;text-shadow:2px 2px 0 var(--violet-d);}
+.brand{font-family:'Press Start 2P';font-size:11px;color:#fff;line-height:2;margin-top:14px;}
+.brand .sub{display:block;font-family:'Noto Serif SC';font-weight:500;font-size:14px;color:var(--violet-l);margin-top:8px;letter-spacing:0;}
+
+/* 烟花粒子 */
+.fx{position:absolute;width:7px;height:7px;pointer-events:none;z-index:150;}
+
+/* 进度点 */
+.dots{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:160;}
+.dots i{width:7px;height:7px;background:var(--line);transition:.3s;}
+.dots i.on{background:var(--gold);transform:scale(1.3);}
+.mode-tag{position:absolute;top:12px;right:16px;font-family:'Press Start 2P';font-size:7px;color:var(--rose);border:1px solid var(--rose);padding:4px 6px;z-index:40;animation:blink 1.2s infinite;letter-spacing:1px;}
+@keyframes blink{50%{opacity:.25}}
+.note{font-family:'Noto Serif SC';font-weight:500;font-size:12px;color:var(--dim);text-align:center;margin-top:14px;letter-spacing:1px;}
+</style>
+
+<div id="phone">
+
+  <!-- 屏1 开屏 -->
+  <section class="screen center active" data-s="0">
+    <div class="spacer"></div>
+    <div class="kicker">A QWEN INTERACTIVE</div>
+    <div class="castle sprite" style="margin:22px 0;"></div>
+    <h1 class="h-title" style="font-size:42px;">报销<br>大作战</h1>
+    <p class="body" style="font-size:17px;margin-top:18px;">妈妈住院的钱，怎么拿回来？</p>
+    <div class="spacer"></div>
+    <button class="btn breathe" onclick="go(1)">▶ 开始挑战</button>
+    <p class="note">竖屏体验 · 一支关于「千问」的互动</p>
+  </section>
+
+  <!-- 屏2 任务下达 -->
+  <section class="screen center" data-s="1">
+    <div class="spacer"></div>
+    <div class="avatar sprite"></div>
+    <div style="background:var(--bg1);box-shadow:var(--shadow);padding:22px;margin-top:28px;max-width:310px;border-top:4px solid var(--rose);">
+      <p class="body" style="font-size:17px;">「妈出院了，一叠单子甩给我。」</p>
+      <p class="body" style="font-size:17px;color:var(--rose);font-weight:700;margin-top:12px;">「报销？我连从哪儿开始<br>都不知道……」</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="go(2)">硬着头皮上 →</button>
+  </section>
+
+  <!-- 屏3 关卡1 -->
+  <section class="screen" data-s="2">
+    <div class="mode-tag">HELL MODE</div>
+    <div class="hud">
+      <span class="stage-tag">STAGE 1 / 材料迷宫</span>
+      <span class="hearts" id="h1"></span>
+    </div>
+    <p class="hint">找齐报销要用的材料</p>
+    <div class="timer"><i id="t1"></i></div>
+    <div class="grid" id="grid1"></div>
+    <p class="feedback" id="msg1"></p>
+  </section>
+
+  <!-- 屏4 关卡2 -->
+  <section class="screen" data-s="3">
+    <div class="mode-tag">HELL MODE</div>
+    <div class="hud">
+      <span class="stage-tag">STAGE 2 / 窗口排队</span>
+      <span class="hearts" id="h2"></span>
+    </div>
+    <div class="queue-wrap">
+      <div class="sign" id="sign2"><span class="px-font">报销窗口<br>—— 请 排 队 ——</span></div>
+      <div class="queue" id="queue2"></div>
+      <p class="feedback" id="msg2">点「前进」去排队…</p>
+      <button class="btn sm" id="qbtn" onclick="queueStep()" style="align-self:center;">前进一步</button>
+    </div>
+  </section>
+
+  <!-- 屏5 关卡3 -->
+  <section class="screen" data-s="4">
+    <div class="mode-tag">HELL MODE</div>
+    <div class="hud">
+      <span class="stage-tag">STAGE 3 / 名词翻译</span>
+      <span class="hearts" id="h3"></span>
+    </div>
+    <p class="hint">这些"黑话"到底啥意思？</p>
+    <div class="jargon-box"><div class="word" id="jword">起付线</div><div class="q px-font">WHAT IS THIS?</div></div>
+    <div class="opts" id="opts3"></div>
+    <p class="feedback" id="msg3"></p>
+  </section>
+
+  <!-- 屏6 GAME OVER -->
+  <section class="screen center" data-s="5">
+    <div class="spacer"></div>
+    <p class="go-big">GAME<br>OVER</p>
+    <p class="body dim" style="font-size:16px;margin-top:20px;">这游戏……也太难了吧。</p>
+    <div class="spacer"></div>
+    <div class="whisper">
+      <p class="body" style="font-size:16px;color:var(--violet-l);">试试……换个方式？</p>
+    </div>
+    <button class="btn violet breathe" onclick="go(6)" style="margin-top:26px;">问问 千问</button>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- 屏7 千问对话 -->
+  <section class="screen qwen-screen" data-s="6">
+    <div class="chat-head">
+      <div class="q-logo"></div>
+      <div class="q-name">QWEN<small>千问 · 帮你办事的 AI</small></div>
+    </div>
+    <div class="chat-flow" id="chat"></div>
+    <div class="cinput" id="cinput">
+      <div class="fake" id="fakeinput">我妈住院的钱，怎么报销？</div>
+      <button class="send" id="sendbtn" onclick="qwenSend()"></button>
+    </div>
+  </section>
+
+  <!-- 屏8 通关落版 -->
+  <section class="screen center" data-s="7">
+    <p class="clear-big">CLEAR!</p>
+    <p class="h-title" style="font-size:22px;color:var(--mint);margin-top:14px;">难事，一句话通关</p>
+    <p class="body" style="font-size:15px;margin-top:10px;">技能已解锁 · 这个本事，全家都能用</p>
+    <div class="gen-grid" id="genGrid"></div>
+    <p class="note" id="genTip">▸ 点亮全家四代</p>
+    <div id="endcard" style="display:none;width:100%;">
+      <p class="slogan">难事，<br>一句话通关</p>
+      <p class="brand">QWEN · 千问<span class="sub">第一个真正能帮你办事的 AI</span></p>
+      <button class="btn violet breathe" style="margin-top:22px;" onclick="alert('Demo：此处跳转打开千问 App')">打开千问</button>
+      <button class="btn gold sm" style="margin-top:13px;" onclick="restart()">↺ 再玩一次</button>
+    </div>
+  </section>
+
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+const phone=document.getElementById('phone');
+let cur=0;const TOTAL=8;
+const dots=document.getElementById('dots');
+for(let i=0;i<TOTAL;i++)dots.appendChild(document.createElement('i'));
+function updateDots(){[...dots.children].forEach((d,i)=>d.classList.toggle('on',i===cur));}
+
+function heartsHTML(n,max=3){let s='';for(let i=0;i<max;i++)s+=`<span class="heart${i<n?'':' dead'}"></span>`;return s;}
+
+function show(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`[data-s="${n}"]`).classList.add('active');
+  cur=n;updateDots();
+  phone.style.background = n>=6 ? '#1f1636' : 'var(--bg0)';
+}
+function go(n){
+  show(n);
+  if(n===2)initStage1();
+  if(n===3)initStage2();
+  if(n===4)initStage3();
+  if(n===6)initQwen();
+  if(n===7)initEnd();
+}
+
+/* 关卡1 */
+const items=[
+  {c:'ico-id',l:'身份证',ok:true},
+  {c:'ico-bill',l:'住院发票',ok:true},
+  {c:'ico-doc',l:'出院小结',ok:true},
+  {c:'ico-food',l:'外卖单',ok:false},
+  {c:'ico-ticket',l:'电影票',ok:false},
+  {c:'ico-pet',l:'宠物证',ok:false},
+];
+let s1H,s1F,s1T;
+function initStage1(){
+  s1H=3;s1F=0;document.getElementById('h1').innerHTML=heartsHTML(3);
+  document.getElementById('msg1').textContent='';
+  const g=document.getElementById('grid1');g.innerHTML='';
+  [...items].sort(()=>Math.random()-.5).forEach(it=>{
+    const c=document.createElement('div');c.className='matcard';
+    c.innerHTML=`<div class="ico ${it.c}"></div><div class="nm">${it.l}</div>`;
+    c.onclick=()=>pick1(c,it);g.appendChild(c);
+  });
+  const bar=document.getElementById('t1');bar.style.width='100%';let w=100;clearInterval(s1T);
+  s1T=setInterval(()=>{w-=1.0;bar.style.width=w+'%';
+    if(w<=0){clearInterval(s1T);document.getElementById('msg1').textContent='窗口要下班了！太慢啦…';lose1();}},100);
+}
+function pick1(c,it){
+  if(it.ok){c.classList.add('right','picked');s1F++;
+    if(s1F>=3){clearInterval(s1T);document.getElementById('msg1').style.color='var(--mint)';
+      document.getElementById('msg1').textContent='材料齐了…可这才第一关。';setTimeout(()=>go(3),950);}
+  }else{c.classList.add('wrong');setTimeout(()=>c.classList.remove('wrong'),320);
+    document.getElementById('msg1').textContent='这个不对！重选…';lose1();}
+}
+function lose1(){s1H--;document.getElementById('h1').innerHTML=heartsHTML(Math.max(s1H,0));
+  if(s1H<=0){clearInterval(s1T);setTimeout(()=>go(3),750);}}
+
+/* 关卡2 */
+let q2s,q2H;
+function initStage2(){
+  q2s=0;q2H=3;document.getElementById('h2').innerHTML=heartsHTML(3);
+  const sg=document.getElementById('sign2');sg.className='sign';sg.innerHTML='<span class="px-font">报销窗口<br>—— 请 排 队 ——</span>';
+  document.getElementById('msg2').textContent='点「前进」去排队…';
+  document.getElementById('msg2').style.color='var(--dim)';
+  document.getElementById('qbtn').textContent='前进一步';
+  renderQueue(5);
+}
+function renderQueue(n,meAt){
+  const q=document.getElementById('queue2');q.innerHTML='';
+  for(let i=0;i<n;i++){const p=document.createElement('div');p.className='person'+(i===(meAt??n-1)?' me':'');q.appendChild(p);}
+}
+function queueStep(){
+  q2s++;const msg=document.getElementById('msg2');msg.style.color='var(--rose)';
+  if(q2s===1){msg.textContent='慢慢往前挪…';msg.style.color='var(--dim)';renderQueue(4,3);}
+  else if(q2s===2){
+    const sg=document.getElementById('sign2');sg.className='sign err';
+    sg.innerHTML='<span class="px-font">✕ 此窗口不办此业务<br>请到 3 号窗口</span>';
+    msg.textContent='啊？！跑错窗口了…';renderQueue(1,0);
+    q2H--;document.getElementById('h2').innerHTML=heartsHTML(q2H);
+    document.getElementById('qbtn').textContent='换队重排 ↻';
+  }else if(q2s===3){
+    const sg=document.getElementById('sign2');sg.className='sign';
+    sg.innerHTML='<span class="px-font">3 号窗口<br>—— 重 新 排 队 ——</span>';
+    msg.textContent='又得从头排…心好累。';renderQueue(6,5);
+    document.getElementById('qbtn').textContent='继续忍…';
+  }else{msg.style.color='var(--dim)';msg.textContent='排到了，可还有下一关…';setTimeout(()=>go(4),900);}
+}
+
+/* 关卡3 */
+const jargons=[
+  {w:'起付线',o:['报销的"门槛"金额，超了才报','排队等候的那条黄线','医院的起跑线'],a:0},
+  {w:'乙类自付',o:['某些药要先自付一部分','乙肝专用的报销','第二类排队窗口'],a:0},
+];
+let j3,s3H;
+function initStage3(){j3=0;s3H=3;document.getElementById('h3').innerHTML=heartsHTML(3);document.getElementById('msg3').textContent='';renderJargon();}
+function renderJargon(){
+  const j=jargons[j3];document.getElementById('jword').textContent=j.w;
+  const box=document.getElementById('opts3');box.innerHTML='';
+  j.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>ans3(b,i,j.a);box.appendChild(b);});
+}
+function ans3(b,i,a){
+  if(i===a){b.classList.add('right');j3++;
+    if(j3>=jargons.length){document.getElementById('msg3').style.color='var(--mint)';document.getElementById('msg3').textContent='好不容易…但你已经精疲力尽。';setTimeout(over,1050);}
+    else setTimeout(renderJargon,620);
+  }else{b.classList.add('wrong');s3H--;document.getElementById('h3').innerHTML=heartsHTML(Math.max(s3H,0));
+    document.getElementById('msg3').textContent='又错了…这些词谁看得懂啊？';if(s3H<=0)setTimeout(over,750);}
+}
+function over(){go(5);}
+
+/* 屏7 千问 */
+function initQwen(){
+  document.getElementById('chat').innerHTML='';
+  document.getElementById('cinput').style.display='flex';
+  document.getElementById('sendbtn').disabled=false;
+}
+function bubble(cls,html,delay=0){return new Promise(r=>setTimeout(()=>{
+  const b=document.createElement('div');b.className='bubble '+cls;b.innerHTML=html;
+  const c=document.getElementById('chat');c.appendChild(b);c.scrollTop=99999;r();},delay));}
+function typing(){const c=document.getElementById('chat');const t=document.createElement('div');t.className='typing';t.id='typing';t.innerHTML='<i></i><i></i><i></i>';c.appendChild(t);c.scrollTop=99999;}
+function stopTyping(){const t=document.getElementById('typing');if(t)t.remove();}
+async function qwenSend(){
+  document.getElementById('sendbtn').disabled=true;
+  document.getElementById('cinput').style.display='none';
+  await bubble('user','我妈住院的钱，怎么报销？',100);
+  typing();await new Promise(r=>setTimeout(r,900));stopTyping();
+  await bubble('bot','别急，这事我帮你拆清楚 👇',0);
+  await bubble('bot','<b>① 你要带这些材料：</b><ul class="checklist"><li style="animation-delay:.1s">✓ 身份证</li><li style="animation-delay:.45s">✓ 住院发票</li><li style="animation-delay:.8s">✓ 出院小结</li></ul>',850);
+  await bubble('bot','<b>② "起付线"是啥？</b><br>就是报销的门槛金额，超过的部分才报 —— 名词而已，别怕。',1500);
+  await bubble('bot','<b>③ 不用跑窗口、不用排队</b><br>路我都帮你铺好了 👇',1100);
+  await new Promise(r=>setTimeout(r,700));
+  const c=document.getElementById('chat');
+  const p=document.createElement('p');p.className='prog';p.textContent='办事步骤省去 60%+';c.appendChild(p);
+  const d=document.createElement('div');d.className='door';d.textContent='直达办理入口 →';d.onclick=()=>{fireworks();setTimeout(()=>go(7),500);};c.appendChild(d);
+  c.scrollTop=99999;
+}
+
+/* 屏8 */
+const gens=[{f:'f-ma',w:'妈',a:'看病买药 问一句'},{f:'f-me',w:'我',a:'报销社保 问一句'},{f:'f-di',w:'弟',a:'租房落户 问一句'},{f:'f-wa',w:'娃',a:'以后本该如此'}];
+let lit;
+function initEnd(){
+  lit=0;document.getElementById('endcard').style.display='none';document.getElementById('genTip').style.display='block';
+  const g=document.getElementById('genGrid');g.innerHTML='';
+  gens.forEach(p=>{const d=document.createElement('div');d.className='gen';
+    d.innerHTML=`<div class="face ${p.f}"></div><div class="who">${p.w}</div><div class="act">${p.a}</div>`;
+    d.onclick=()=>{if(d.classList.contains('lit'))return;d.classList.add('lit');lit++;
+      if(lit>=4){document.getElementById('genTip').style.display='none';setTimeout(()=>{document.getElementById('endcard').style.display='block';fireworks();},400);}};
+    g.appendChild(d);});
+}
+
+/* 烟花 */
+function fireworks(){
+  const cols=['#ffc94d','#8b6bff','#5fe6b8','#ff5c7c','#b9a4ff'];
+  for(let i=0;i<44;i++){const f=document.createElement('div');f.className='fx';f.style.background=cols[i%cols.length];
+    f.style.left='50%';f.style.top='42%';phone.appendChild(f);
+    const a=Math.random()*Math.PI*2,d=60+Math.random()*170,x=Math.cos(a)*d,y=Math.sin(a)*d;
+    f.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${x}px,${y}px)`,opacity:0}],{duration:750+Math.random()*500,easing:'ease-out'});
+    setTimeout(()=>f.remove(),1300);}
+}
+function restart(){go(0);}
+document.getElementById('h1').innerHTML=heartsHTML(3);
+updateDots();
+</script>
